@@ -1,7 +1,17 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"log"
+
+	"github.com/sonwlynxsoftware/oto-api/cmd"
+)
 
 func main() {
-	fmt.Println("Hello, World!")
+	handler := cmd.NewHandler()
+	err := handler.ExecuteCommand()
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("done")
 }
