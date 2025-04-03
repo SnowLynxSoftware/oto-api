@@ -1,9 +1,8 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/sonwlynxsoftware/oto-api/config"
+	"github.com/sonwlynxsoftware/oto-api/server"
 )
 
 type ServerCommand struct {
@@ -12,7 +11,7 @@ type ServerCommand struct {
 func (s *ServerCommand) Execute() error {
 	appConfig := config.NewAppConfig()
 
-	fmt.Println("Hello, World! " + appConfig.GetCloudEnv() + " " + appConfig.GetDBConnectionString())
-
+	server := server.NewAppServer(appConfig)
+	server.Start()
 	return nil
 }

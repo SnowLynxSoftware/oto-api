@@ -1,0 +1,53 @@
+version: "3.8"
+
+services:
+  # redis:
+  #   image: redis:latest
+  #   container_name: redis
+  #   ports:
+  #     - "6379:6379"
+
+  postgres:
+    image: postgres:17-alpine
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: p@ssw0rd
+      POSTGRES_DB: opentriviaonline
+    ports:
+      - "5432:5432"
+
+  # rabbitmq:
+  #   image: rabbitmq:management
+  #   container_name: rabbitmq
+  #   environment:
+  #     RABBITMQ_DEFAULT_USER: admin
+  #     RABBITMQ_DEFAULT_PASS: p@ssw0rd
+  #   ports:
+  #     - "5672:5672"
+  #     - "15672:15672"
+
+  # elasticsearch:
+  #   image: docker.elastic.co/elasticsearch/elasticsearch:8.17.4
+  #   container_name: elasticsearch
+  #   environment:
+  #     discovery.type: single-node
+  #     ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+  #     xpack.security.enabled: "false"
+  #     xpack.security.transport.ssl.enabled: "false"
+  #   ports:
+  #     - "9200:9200"
+  #     - "9300:9300"
+
+  # kibana:
+  #   image: docker.elastic.co/kibana/kibana:8.17.4
+  #   container_name: kibana
+  #   environment:
+  #     ELASTICSEARCH_HOSTS: "http://elasticsearch:9200"
+  #     ELASTICSEARCH_USERNAME: "admin"
+  #     ELASTICSEARCH_PASSWORD: "p@ssw0rd"
+  #     xpack.security.enabled: "false"
+  #   ports:
+  #     - "5601:5601"
+  #   depends_on:
+  #     - elasticsearch

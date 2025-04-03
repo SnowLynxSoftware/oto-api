@@ -16,7 +16,8 @@ type Handler struct {
 func NewHandler() *Handler {
 
 	cmds := map[string]Command{
-		"server": &ServerCommand{},
+		"server":  &ServerCommand{},
+		"migrate": &MigrateCommand{},
 	}
 
 	return &Handler{
