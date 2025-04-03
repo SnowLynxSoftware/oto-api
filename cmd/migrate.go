@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"github.com/morpheuszero/go-heimdall"
-	"github.com/sonwlynxsoftware/oto-api/config"
+	"github.com/snowlynxsoftware/oto-api/config"
 )
 
 type MigrateCommand struct {

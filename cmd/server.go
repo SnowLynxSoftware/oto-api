@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"github.com/sonwlynxsoftware/oto-api/config"
-	"github.com/sonwlynxsoftware/oto-api/server"
+	"github.com/snowlynxsoftware/oto-api/config"
+	"github.com/snowlynxsoftware/oto-api/server"
 )
 
 type ServerCommand struct {

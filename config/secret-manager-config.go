@@ -28,18 +28,22 @@ func NewSecretManagerConfig(cloudEnv string) *SecretManagerConfig {
 	}
 }
 
-func (s *SecretManagerConfig) GetLogLevel() (string, error) {
+func (s *SecretManagerConfig) GetDebugMode() (bool, error) {
 	input := &secretsmanager.GetSecretValueInput{
-		SecretId: aws.String(s.cloudEnv + "_LOG_LEVEL"),
+		SecretId: aws.String(s.cloudEnv + "_DEBUG_MODE"),
 	}
 
 	result, err := s.client.GetSecretValue(context.TODO(), input)
 	if err != nil {
-		return "", err
+		return false, err
 	}
 
 	secretString := *result.SecretString
-	return secretString, nil
+	if secretString == "true" {
+		return true, nil
+	} else {
+		return false, nil
+	}
 }
 
 func (s *SecretManagerConfig) GetDBConnectionString() (string, error) {

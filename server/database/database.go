@@ -1,10 +1,9 @@
 package database
 
 import (
-	"fmt"
-
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
+	"github.com/snowlynxsoftware/oto-api/server/util"
 )
 
 type AppDataSource struct {
@@ -25,5 +24,5 @@ func (d *AppDataSource) Connect(dbConnectionString string) {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("Database is connected")
+	util.LogInfo("Connected to database")
 }

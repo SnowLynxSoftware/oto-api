@@ -8,9 +8,10 @@ import (
 	"github.com/go-chi/chi/v5"
 	mid "github.com/go-chi/chi/v5/middleware"
 
-	"github.com/sonwlynxsoftware/oto-api/config"
-	"github.com/sonwlynxsoftware/oto-api/server/controllers"
-	"github.com/sonwlynxsoftware/oto-api/server/database"
+	"github.com/snowlynxsoftware/oto-api/config"
+	"github.com/snowlynxsoftware/oto-api/server/controllers"
+	"github.com/snowlynxsoftware/oto-api/server/database"
+	"github.com/snowlynxsoftware/oto-api/server/util"
 )
 
 type AppServer struct {
@@ -31,6 +32,9 @@ func NewAppServer(config *config.AppConfig) *AppServer {
 }
 
 func (s *AppServer) Start() {
+
+	// Setup logger
+	util.SetupZeroLogger(s.AppConfig.IsDebugMode())
 
 	// Connect to DB
 	s.DB = database.NewAppDataSource()
@@ -57,6 +61,6 @@ func (s *AppServer) Start() {
 	// s.Router.Mount("/api/lists", controllers.NewListController(authMiddleware, listService).MapController())
 	// s.Router.Mount("/", controllers.NewUIController(&templatesFS, authMiddleware, listService).MapController())
 
-	fmt.Printf("Server starting on port %s\n", 3000)
+	util.LogInfo(fmt.Sprintf("Starting server on port %s", "3000"))
 	log.Fatal(http.ListenAndServe(":3000", s.Router))
 }

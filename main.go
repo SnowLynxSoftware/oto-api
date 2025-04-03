@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/sonwlynxsoftware/oto-api/cmd"
+	"github.com/snowlynxsoftware/oto-api/cmd"
 )
 
 func main() {

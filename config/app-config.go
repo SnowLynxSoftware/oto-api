@@ -11,7 +11,7 @@ type AppConfig struct {
 	cloudEnv           string
 	awsAccessKeyId     string
 	awsSecretAccessKey string
-	logLevel           string
+	debugMode           bool
 	dBConnectionString string
 }
 
@@ -24,7 +24,7 @@ func NewAppConfig() *AppConfig {
 	appConfig.awsSecretAccessKey = os.Getenv("AWS_SECRET_ACCESS_KEY")
 
 	// Default values
-	appConfig.logLevel = "info"
+	appConfig.debugMode = os.Getenv("DEBUG_MODE") == "true"
 	appConfig.dBConnectionString = ""
 
 	if appConfig.cloudEnv == "" {
@@ -36,7 +36,7 @@ func NewAppConfig() *AppConfig {
 	// If we use secret manager, it will happen first.
 	if useSecretManager {
 		secretManager := NewSecretManagerConfig(appConfig.cloudEnv)
-		appConfig.logLevel, _ = secretManager.GetLogLevel()
+		appConfig.debugMode, _ = secretManager.GetDebugMode()
 		appConfig.dBConnectionString, _ = secretManager.GetDBConnectionString()
 	}
 
@@ -61,8 +61,8 @@ func (a *AppConfig) GetCloudEnv() string {
 	return a.cloudEnv
 }
 
-func (a *AppConfig) GetLogLevel() string {
-	return a.logLevel
+func (a *AppConfig) IsDebugMode() bool {
+	return a.debugMode
 }
 
 func (a *AppConfig) GetDBConnectionString() string {
