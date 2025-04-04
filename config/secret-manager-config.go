@@ -12,6 +12,9 @@ import (
 type ISecretManagerConfig interface {
 	GetDebugMode() (bool, error)
 	GetDBConnectionString() (string, error)
+	GetAuthHashPepper() (string, error)
+	GetJWTSecretKey() (string, error)
+	GetSendgridAPIKey() (string, error)
 }
 
 type SecretManagerConfig struct {
@@ -54,6 +57,48 @@ func (s *SecretManagerConfig) GetDebugMode() (bool, error) {
 func (s *SecretManagerConfig) GetDBConnectionString() (string, error) {
 	input := &secretsmanager.GetSecretValueInput{
 		SecretId: aws.String(s.cloudEnv + "_DB_CONNECTION_STRING"),
+	}
+
+	result, err := s.client.GetSecretValue(context.TODO(), input)
+	if err != nil {
+		return "", err
+	}
+
+	secretString := *result.SecretString
+	return secretString, nil
+}
+
+func (s *SecretManagerConfig) GetAuthHashPepper() (string, error) {
+	input := &secretsmanager.GetSecretValueInput{
+		SecretId: aws.String(s.cloudEnv + "_AUTH_HASH_PEPPER"),
+	}
+
+	result, err := s.client.GetSecretValue(context.TODO(), input)
+	if err != nil {
+		return "", err
+	}
+
+	secretString := *result.SecretString
+	return secretString, nil
+}
+
+func (s *SecretManagerConfig) GetJWTSecretKey() (string, error) {
+	input := &secretsmanager.GetSecretValueInput{
+		SecretId: aws.String(s.cloudEnv + "_JWT_SECRET_KEY"),
+	}
+
+	result, err := s.client.GetSecretValue(context.TODO(), input)
+	if err != nil {
+		return "", err
+	}
+
+	secretString := *result.SecretString
+	return secretString, nil
+}
+
+func (s *SecretManagerConfig) GetSendgridAPIKey() (string, error) {
+	input := &secretsmanager.GetSecretValueInput{
+		SecretId: aws.String(s.cloudEnv + "_SENDGRID_API_KEY"),
 	}
 
 	result, err := s.client.GetSecretValue(context.TODO(), input)
