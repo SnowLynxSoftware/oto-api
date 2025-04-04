@@ -103,6 +103,12 @@ func (c *AuthController) sendLoginEmail(w http.ResponseWriter, r *http.Request) 
 }
 
 func (c *AuthController) register(w http.ResponseWriter, r *http.Request) {
+
+	if r.Body == http.NoBody {
+		http.Error(w, "request body is required", http.StatusBadRequest)
+		return
+	}
+
 	var userCreateDTO models.UserCreateDTO
 
 	err := json.NewDecoder(r.Body).Decode(&userCreateDTO)

@@ -18,7 +18,7 @@ func (e *EmailTemplates) GetNewUserEmailTemplate(baseURL string, verificationTok
 	return fmt.Sprintf(`
 		<p>
 			Hello and Welcome to OpenZooSim! Please verify your account by 
-			<a href="%v/api/auth/verify?token=%v">Clicking Here!</a>
+			<a href="%v/auth/verify?token=%v">Clicking Here!</a>
 		</p>
 	`, baseURL, verificationToken)
 }
@@ -27,7 +27,7 @@ func (e *EmailTemplates) GetLoginEmailTemplate(baseURL string, verificationToken
 	return fmt.Sprintf(`
 		<p>
 			Hello! You can login to your account by 
-			<a href="%v/api/auth/login-with-email?token=%v">Clicking Here!</a>
+			<a href="%v/auth/login-with-email?token=%v">Clicking Here!</a>
 		</p>
 
 		<p>

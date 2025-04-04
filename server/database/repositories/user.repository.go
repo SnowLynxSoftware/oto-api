@@ -73,10 +73,10 @@ func (r *UserRepository) GetUserByEmail(email string) (*UserEntity, error) {
 }
 
 func (r *UserRepository) CreateNewUser(dto *models.UserCreateDTO) (*UserEntity, error) {
-	sql := `INSERT INTO users (email, display_name, password_hash)
-    VALUES ($1, $2, $3)
+	sql := `INSERT INTO users (email, display_name, password_hash, user_type_key)
+    VALUES ($1, $2, $3, $4)
     RETURNING id;`
-	row := r.db.DB.QueryRow(sql, dto.Email, dto.DisplayName, dto.Password)
+	row := r.db.DB.QueryRow(sql, dto.Email, dto.DisplayName, dto.Password, "player")
 	var insertedId int
 	err := row.Scan(&insertedId)
 	if err != nil {
