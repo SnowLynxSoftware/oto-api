@@ -15,12 +15,12 @@ import (
 )
 
 type AppServer struct {
-	AppConfig *config.AppConfig
+	AppConfig config.IAppConfig
 	Router    *chi.Mux
 	DB        *database.AppDataSource
 }
 
-func NewAppServer(config *config.AppConfig) *AppServer {
+func NewAppServer(config config.IAppConfig) *AppServer {
 
 	r := chi.NewRouter()
 	r.Use(mid.Logger)

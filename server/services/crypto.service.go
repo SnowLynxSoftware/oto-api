@@ -8,11 +8,16 @@ import (
 
 var bcryptCost = 13
 
+type ICryptoService interface {
+	HashPassword(password string) (*string, error)
+	ValidatePassword(password string, hash string) (bool, error)
+}
+
 type CryptoService struct {
 	pepper string
 }
 
-func NewCryptoService(pepper string) *CryptoService {
+func NewCryptoService(pepper string) ICryptoService {
 	return &CryptoService{
 		pepper: pepper,
 	}

@@ -7,15 +7,21 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 )
 
+type IAppConfig interface {
+	GetCloudEnv() string
+	IsDebugMode() bool
+	GetDBConnectionString() string
+}
+
 type AppConfig struct {
 	cloudEnv           string
 	awsAccessKeyId     string
 	awsSecretAccessKey string
-	debugMode           bool
+	debugMode          bool
 	dBConnectionString string
 }
 
-func NewAppConfig() *AppConfig {
+func NewAppConfig() IAppConfig {
 
 	appConfig := &AppConfig{}
 	// Required environment variables

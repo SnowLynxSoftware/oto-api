@@ -72,18 +72,18 @@ func TestEmptyPassword(t *testing.T) {
 }
 
 func TestShortPassword(t *testing.T) {
-    pepper := "testPepper"
-    service := NewCryptoService(pepper)
+	pepper := "testPepper"
+	service := NewCryptoService(pepper)
 
-    // Test password shorter than 10 characters
-    shortPassword := "short"
-    _, err := service.HashPassword(shortPassword)
-    if err == nil {
-        t.Fatalf("expected an error for short password, got nil")
-    }
+	// Test password shorter than 10 characters
+	shortPassword := "short"
+	_, err := service.HashPassword(shortPassword)
+	if err == nil {
+		t.Fatalf("expected an error for short password, got nil")
+	}
 
-    expectedError := "password must be at least 10 characters long"
-    if err.Error() != expectedError {
-        t.Fatalf("expected error '%s', got '%s'", expectedError, err.Error())
-    }
+	expectedError := "password must be at least 10 characters long"
+	if err.Error() != expectedError {
+		t.Fatalf("expected error '%s', got '%s'", expectedError, err.Error())
+	}
 }

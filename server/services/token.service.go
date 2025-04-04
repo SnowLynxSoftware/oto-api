@@ -16,11 +16,19 @@ const (
 	claimIssuer                            = "https://opentriviaonline.com"
 )
 
+type ITokenService interface {
+	GenerateAccessToken(id int) (*string, error)
+	GenerateLoginWithEmailToken(id int) (*string, error)
+	GenerateVerificationToken(id int) (*string, error)
+	GenerateRefreshToken(id int) (*string, error)
+	ValidateToken(tokenToVerify *string) (*int, error)
+}
+
 type TokenService struct {
 	jwtSecretKey string
 }
 
-func NewTokenService(jwtSecretKey string) *TokenService {
+func NewTokenService(jwtSecretKey string) ITokenService {
 	return &TokenService{
 		jwtSecretKey: jwtSecretKey,
 	}

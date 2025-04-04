@@ -9,12 +9,17 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/secretsmanager"
 )
 
+type ISecretManagerConfig interface {
+	GetDebugMode() (bool, error)
+	GetDBConnectionString() (string, error)
+}
+
 type SecretManagerConfig struct {
 	cloudEnv string
 	client   *secretsmanager.Client
 }
 
-func NewSecretManagerConfig(cloudEnv string) *SecretManagerConfig {
+func NewSecretManagerConfig(cloudEnv string) ISecretManagerConfig {
 	config, err := config.LoadDefaultConfig(context.TODO())
 	if err != nil {
 		log.Fatal(err)
