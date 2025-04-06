@@ -1,0 +1,48 @@
+# Builder stage
+FROM golang:1.24-alpine AS builder
+
+# Install necessary build tools
+RUN apk add --no-cache git ca-certificates tzdata && \
+    update-ca-certificates
+
+# Set working directory
+WORKDIR /app
+
+# Copy go mod and sum files
+COPY go.mod go.sum ./
+
+# Download dependencies
+RUN go mod download
+
+# Copy source code
+COPY . .
+
+# Build the application
+# CGO_ENABLED=0 creates a statically linked binary
+# -ldflags="-w -s" reduces binary size by removing debug information
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o /app/oto-api .
+
+# Final stage
+FROM alpine:latest
+
+# Add non-root user for security
+RUN addgroup -S otogroup && adduser -S otouser -G otogroup
+
+# Install minimal runtime dependencies
+RUN apk --no-cache add ca-certificates tzdata && \
+    update-ca-certificates
+
+# Set working directory
+WORKDIR /app
+
+# Copy the binary from builder
+COPY --from=builder /app/oto-api /app/
+
+# Use non-root user
+USER otouser
+
+# Expose the application port
+EXPOSE 3000
+
+# Run the application
+CMD ["/app/oto-api"]
