@@ -18,8 +18,6 @@ type IAppConfig interface {
 
 type AppConfig struct {
 	cloudEnv           string
-	awsAccessKeyId     string
-	awsSecretAccessKey string
 	debugMode          bool
 	dBConnectionString string
 	authHashPepper     string
@@ -32,8 +30,6 @@ func NewAppConfig() IAppConfig {
 	appConfig := &AppConfig{}
 	// Required environment variables
 	appConfig.cloudEnv = os.Getenv("CLOUD_ENV")
-	appConfig.awsAccessKeyId = os.Getenv("AWS_ACCESS_KEY_ID")
-	appConfig.awsSecretAccessKey = os.Getenv("AWS_SECRET_ACCESS_KEY")
 
 	// Default values
 	appConfig.debugMode = os.Getenv("DEBUG_MODE") == "true"
@@ -44,18 +40,6 @@ func NewAppConfig() IAppConfig {
 
 	if appConfig.cloudEnv == "" {
 		log.Fatal("[CLOUD_ENV] is required")
-	}
-
-	useSecretManager := os.Getenv("USE_SECRET_MANAGER") == "true"
-
-	// If we use secret manager, it will happen first.
-	if useSecretManager {
-		secretManager := NewSecretManagerConfig(appConfig.cloudEnv)
-		appConfig.debugMode, _ = secretManager.GetDebugMode()
-		appConfig.dBConnectionString, _ = secretManager.GetDBConnectionString()
-		appConfig.authHashPepper, _ = secretManager.GetAuthHashPepper()
-		appConfig.jwtSecretKey, _ = secretManager.GetJWTSecretKey()
-		appConfig.sendgridAPIKey, _ = secretManager.GetSendgridAPIKey()
 	}
 
 	// Load any additional variables from the environment and override the secret manager values
