@@ -25,9 +25,11 @@ jobs:
       # Build the Docker image
       - name: Build Docker image
         run: |
-          docker build -t ghcr.io/${{ github.repository }}/oto-api:${{ github.sha }} .
+          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          docker build -t ghcr.io/snowlynxsoftware/oto-api/oto-api:$SHORT_SHA .
 
       # Push the Docker image to the GitHub Container Registry
       - name: Push Docker image
         run: |
-          docker push ghcr.io/${{ github.repository }}/oto-api:${{ github.sha }}
+          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          docker push ghcr.io/snowlynxsoftware/oto-api/oto-api:$SHORT_SHA
