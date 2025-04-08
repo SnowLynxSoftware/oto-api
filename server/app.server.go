@@ -44,6 +44,7 @@ func (s *AppServer) Start() {
 	s.dB.Connect(s.appConfig.GetDBConnectionString())
 
 	// Configure Repositories
+	waitlistRepository := repositories.NewWaitlistRepository(s.dB)
 	userRepository := repositories.NewUserRepository(s.dB)
 
 	// Configure Services
@@ -51,6 +52,7 @@ func (s *AppServer) Start() {
 	cryptoService := services.NewCryptoService(s.appConfig.GetAuthHashPepper())
 	tokenService := services.NewTokenService(s.appConfig.GetJWTSecretKey())
 	authService := services.NewAuthService(userRepository, tokenService, cryptoService, emailService)
+	waitlistService := services.NewWaitlistService(waitlistRepository)
 
 	// Configure Middleware
 	authMiddleware := middleware.NewAuthMiddleware(userRepository, tokenService)
@@ -58,6 +60,7 @@ func (s *AppServer) Start() {
 	// Configure Controllers
 	s.router.Mount("/health", controllers.NewHealthController().MapController())
 	s.router.Mount("/auth", controllers.NewAuthController(authMiddleware, authService).MapController())
+	s.router.Mount("/waitlist", controllers.NewWaitlistController(waitlistService).MapController())
 
 	util.LogInfo(fmt.Sprintf("Starting server on port %s", "3000"))
 	log.Fatal(http.ListenAndServe(":3000", s.router))
