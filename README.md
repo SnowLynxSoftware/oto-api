@@ -48,3 +48,13 @@ To run all unit tests, use the following command:
 ```bash
 go test ./... -v
 ```
+
+## Deployments
+
+When running the deploy command on the server, you may need to authenticate with the Container Registry:
+
+```
+docker login ghcr.io -u <YOUR_GITHUB_USERNAME> -p <YOUR_PAT>
+```
+
+- [Installing NGINX](https://ubuntu.com/tutorials/install-and-configure-nginx#2-installing-nginx)
