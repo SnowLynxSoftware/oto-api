@@ -27,7 +27,9 @@ CREATE TABLE IF NOT EXISTS "trivia_decks" (
     "modified_at" TIMESTAMP,
     "is_archived" BOOLEAN DEFAULT false,
     "name" TEXT NOT NULL,
-    "description" TEXT
+    "description" TEXT,
+    "is_approved" BOOLEAN DEFAULT false,
+    "is_system_deck" BOOLEAN DEFAULT false
 );
 
 CREATE TABLE IF NOT EXISTS "trivia_deck_questions" (
@@ -46,10 +48,11 @@ CREATE TABLE IF NOT EXISTS "trivia_game_instances" (
     "created_at" TIMESTAMP DEFAULT (NOW()),
     "modified_at" TIMESTAMP,
     "is_archived" BOOLEAN DEFAULT false
-    "user_id" INTEGER NOT NULL REFERENCES users(id),,
+    "user_id" INTEGER NOT NULL REFERENCES users(id),
     "deck_id" INTEGER NOT NULL REFERENCES trivia_decks(id),
     "started_at" TIMESTAMP DEFAULT (NOW()),
     "ended_at" TIMESTAMP,
+    "num_wrong_choices" INTEGER DEFAULT 3,
     "total_correct" INTEGER DEFAULT 0,
     "total_incorrect" INTEGER DEFAULT 0
 );
