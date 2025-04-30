@@ -55,12 +55,14 @@ func (s *AppServer) Start() {
 	// Configure Repositories
 	waitlistRepository := repositories.NewWaitlistRepository(s.dB)
 	userRepository := repositories.NewUserRepository(s.dB)
+	triviaRepository := repositories.NewTriviaRepository(s.dB)
 
 	// Configure Services
 	emailService := services.NewEmailService(s.appConfig.GetSendgridAPIKey(), services.NewEmailTemplates())
 	cryptoService := services.NewCryptoService(s.appConfig.GetAuthHashPepper())
 	tokenService := services.NewTokenService(s.appConfig.GetJWTSecretKey())
 	authService := services.NewAuthService(userRepository, tokenService, cryptoService, emailService)
+	triviaService := services.NewTriviaService(triviaRepository)
 	waitlistService := services.NewWaitlistService(waitlistRepository)
 
 	// Configure Middleware
@@ -69,6 +71,7 @@ func (s *AppServer) Start() {
 	// Configure Controllers
 	s.router.Mount("/health", controllers.NewHealthController().MapController())
 	s.router.Mount("/auth", controllers.NewAuthController(authMiddleware, authService).MapController())
+	s.router.Mount("/trivia", controllers.NewTriviaController(triviaService, authMiddleware).MapController())
 	s.router.Mount("/waitlist", controllers.NewWaitlistController(waitlistService).MapController())
 
 	util.LogInfo(fmt.Sprintf("Starting server on port %s", "3000"))
