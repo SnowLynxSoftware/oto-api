@@ -30,11 +30,10 @@ func (c *TriviaController) MapController() *chi.Mux {
 }
 
 func (c *TriviaController) importTriviaQuestions(w http.ResponseWriter, r *http.Request) {
-	// TODO: check roles.
-	_, err := c.authMiddleware.Authorize(r, nil)
+	_, err := c.authMiddleware.Authorize(r, []string{"admin"})
 	if err != nil {
 		util.LogErrorWithStackTrace(err)
-		http.Error(w, "you must be logged in", http.StatusUnauthorized)
+		http.Error(w, "you are not authorized to perform this request", http.StatusUnauthorized)
 		return
 	}
 
