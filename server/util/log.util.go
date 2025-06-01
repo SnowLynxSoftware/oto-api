@@ -1,7 +1,10 @@
 package util
 
 import (
+	"fmt"
+	"io"
 	"os"
+	"time"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -9,17 +12,39 @@ import (
 )
 
 func SetupZeroLogger(isDebugMode bool) {
+	currentDay := time.Now().Format("2006-01-02")
+	logFileName := fmt.Sprintf("app-%s.log", currentDay)
+
+	// Open the file in append mode, create if it doesn't exist
+	logFile, err := os.OpenFile(logFileName, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		panic(err)
+	}
+
+	consoleWriter := zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339}
+
 	var logLevel zerolog.Level
 	if isDebugMode {
 		logLevel = zerolog.DebugLevel
 	} else {
 		logLevel = zerolog.InfoLevel
 	}
-	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+	zerolog.TimeFieldFormat = time.RFC3339
 	zerolog.ErrorStackMarshaler = pkgerrors.MarshalStack
 	zerolog.SetGlobalLevel(logLevel)
+
+	// MultiWriter for console + file if in debug, otherwise just file
+	var writer io.Writer
+	if isDebugMode {
+		writer = io.MultiWriter(consoleWriter, logFile)
+	} else {
+		writer = logFile
+	}
+
+	// Configure global logger
+	log.Logger = zerolog.New(writer).With().Timestamp().Logger()
+
 	if logLevel == zerolog.DebugLevel {
-		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout})
 		LogDebug("## Debug mode enabled! ## ")
 	}
 }

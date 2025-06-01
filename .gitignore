@@ -26,3 +26,6 @@ go.work.sum
 
 # DB Certificates
 *.crt
+
+# Local Log Files
+*.log
