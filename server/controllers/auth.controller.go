@@ -14,14 +14,16 @@ import (
 )
 
 type AuthController struct {
-	authMiddleware middleware.IAuthMiddleware
-	authService    services.IAuthService
+	authMiddleware    middleware.IAuthMiddleware
+	authService       services.IAuthService
+	shouldEnableHTTPS bool
 }
 
-func NewAuthController(authMiddleware middleware.IAuthMiddleware, authService services.IAuthService) IController {
+func NewAuthController(authMiddleware middleware.IAuthMiddleware, authService services.IAuthService, shouldEnableHTTPS bool) IController {
 	return &AuthController{
-		authMiddleware: authMiddleware,
-		authService:    authService,
+		authMiddleware:    authMiddleware,
+		authService:       authService,
+		shouldEnableHTTPS: shouldEnableHTTPS,
 	}
 }
 
@@ -62,15 +64,7 @@ func (c *AuthController) login(w http.ResponseWriter, r *http.Request) {
 
 	// log.Info().Str("Access Token: ", response.AccessToken).Msg("")
 
-	http.SetCookie(w, &http.Cookie{
-		Name:     "access_token",
-		Value:    response.AccessToken,
-		Path:     "/",
-		HttpOnly: true,
-		Secure:   false, // Set to true if using HTTPS
-		SameSite: http.SameSiteLaxMode,
-		MaxAge:   59 * 60,
-	})
+	c.setCookie(w, "access_token", response.AccessToken)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
@@ -151,15 +145,7 @@ func (c *AuthController) loginWithEmail(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	http.SetCookie(w, &http.Cookie{
-		Name:     "access_token",
-		Value:    response.AccessToken,
-		Path:     "/",
-		HttpOnly: true,
-		Secure:   false, // Set to true if using HTTPS
-		SameSite: http.SameSiteLaxMode,
-		MaxAge:   59 * 60,
-	})
+	c.setCookie(w, "access_token", response.AccessToken)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
@@ -228,4 +214,16 @@ func (c *AuthController) updateSelfPassword(w http.ResponseWriter, r *http.Reque
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("password updated successfully"))
 
+}
+
+func (c *AuthController) setCookie(w http.ResponseWriter, name string, value string) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     name,
+		Value:    value,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   c.shouldEnableHTTPS, // Set to true if using HTTPS
+		SameSite: http.SameSiteStrictMode,
+		MaxAge:   59 * 60,
+	})
 }

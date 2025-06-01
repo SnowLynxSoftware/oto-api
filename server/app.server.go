@@ -45,6 +45,9 @@ func NewAppServer(config config.IAppConfig) *AppServer {
 
 func (s *AppServer) Start() {
 
+	// Check if the app is running in production mode
+	var isProductionMode = s.appConfig.GetCloudEnv() != "local"
+
 	// Setup logger
 	util.SetupZeroLogger(s.appConfig.IsDebugMode())
 
@@ -70,7 +73,7 @@ func (s *AppServer) Start() {
 
 	// Configure Controllers
 	s.router.Mount("/health", controllers.NewHealthController().MapController())
-	s.router.Mount("/auth", controllers.NewAuthController(authMiddleware, authService).MapController())
+	s.router.Mount("/auth", controllers.NewAuthController(authMiddleware, authService, isProductionMode).MapController())
 	s.router.Mount("/trivia", controllers.NewTriviaController(triviaService, authMiddleware).MapController())
 	s.router.Mount("/waitlist", controllers.NewWaitlistController(waitlistService).MapController())
 
