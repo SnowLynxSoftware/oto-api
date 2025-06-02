@@ -41,6 +41,8 @@ func (s *EmailService) SendEmail(options *EmailSendOptions) bool {
 	htmlContent := options.HTMLContent
 	message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
 	response, err := s.client.Send(message)
+	// fmt.Print(response)
+	// fmt.Print(err)
 	if err != nil {
 		util.LogErrorWithStackTrace(err)
 		return false
