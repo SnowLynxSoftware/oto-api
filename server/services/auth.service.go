@@ -90,9 +90,9 @@ func (s *AuthService) SendLoginEmail(email string) (*repositories.UserEntity, er
 	}
 
 	var emailOptions = &EmailSendOptions{}
-	emailOptions.FromEmail = "do-not-reply@openzoosim.com"
+	emailOptions.FromEmail = "do-not-reply@opentriviaonline.com"
 	emailOptions.ToEmail = user.Email
-	emailOptions.Subject = "OpenZooSim - Login Email"
+	emailOptions.Subject = "Open Trivia Online - Login Email"
 	// TODO: Update this to use the correct URL
 	emailOptions.HTMLContent = s.emailService.GetTemplates().GetLoginEmailTemplate("http://localhost:3000", *verificationToken)
 	var isEmailSuccess = s.emailService.SendEmail(emailOptions)

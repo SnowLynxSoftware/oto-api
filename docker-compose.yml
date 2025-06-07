@@ -13,7 +13,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: p@ssw0rd
-      POSTGRES_DB: opentriviaonline
+      POSTGRES_DB: triviadblocal
     ports:
       - "5432:5432"
 

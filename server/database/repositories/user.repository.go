@@ -24,6 +24,12 @@ type UserEntity struct {
 	BanReason    *string    `json:"ban_reason" db:"ban_reason"`
 }
 
+var (
+	UserTypeAdmin   = "admin"
+	UserTypeSupport = "support"
+	UserTypePlayer  = "player"
+)
+
 type IUserRepository interface {
 	GetUserById(id int) (*UserEntity, error)
 	GetUserByEmail(email string) (*UserEntity, error)
@@ -76,7 +82,7 @@ func (r *UserRepository) CreateNewUser(dto *models.UserCreateDTO) (*UserEntity, 
 	sql := `INSERT INTO users (email, display_name, password_hash, user_type_key)
     VALUES ($1, $2, $3, $4)
     RETURNING id;`
-	row := r.db.DB.QueryRow(sql, dto.Email, dto.DisplayName, dto.Password, "player")
+	row := r.db.DB.QueryRow(sql, dto.Email, dto.DisplayName, dto.Password, UserTypePlayer)
 	var insertedId int
 	err := row.Scan(&insertedId)
 	if err != nil {

@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS "users" (
     "display_name" TEXT NOT NULL,
     "avatar_url" TEXT,
     "profile_text" TEXT,
-    "user_type_key" TEXT NOT NULL,
+    "user_type_key" TEXT NOT NULL, --// admin, support, player
     "is_verified" BOOLEAN DEFAULT false,
     "password_hash" TEXT,
     "last_login" TIMESTAMP,
