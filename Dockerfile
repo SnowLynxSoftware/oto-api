@@ -27,9 +27,6 @@ FROM alpine:latest
 
 LABEL org.opencontainers.image.source https://github.com/SnowLynxSoftware/oto-api
 
-# Add non-root user for security
-RUN addgroup -S otogroup && adduser -S otouser -G otogroup
-
 # Install minimal runtime dependencies
 RUN apk --no-cache add ca-certificates tzdata && \
     update-ca-certificates
@@ -39,12 +36,6 @@ WORKDIR /app
 
 # Copy the binary from builder
 COPY --from=builder /app/oto-api /app/
-
-# Change ownership of /app
-RUN chown -R otouser:otogroup /app
-
-# Use non-root user
-USER otouser
 
 # Expose the application port
 EXPOSE 3000

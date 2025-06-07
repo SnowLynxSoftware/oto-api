@@ -13,7 +13,7 @@ import (
 
 func SetupZeroLogger(isDebugMode bool) {
 	currentDay := time.Now().Format("2006-01-02")
-	logFileName := "/root/deployments/logs/" + fmt.Sprintf("app-%s.log", currentDay)
+	logFileName := "/tmp/" + fmt.Sprintf("app-%s.log", currentDay)
 
 	// Open the file in append mode, create if it doesn't exist
 	logFile, err := os.OpenFile(logFileName, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
