@@ -40,6 +40,9 @@ WORKDIR /app
 # Copy the binary from builder
 COPY --from=builder /app/oto-api /app/
 
+# Change ownership of /app
+RUN chown -R otouser:otogroup /app
+
 # Use non-root user
 USER otouser
 
