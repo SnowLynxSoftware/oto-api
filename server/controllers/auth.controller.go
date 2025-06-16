@@ -218,12 +218,13 @@ func (c *AuthController) updateSelfPassword(w http.ResponseWriter, r *http.Reque
 
 func (c *AuthController) setCookie(w http.ResponseWriter, name string, value string) {
 	http.SetCookie(w, &http.Cookie{
+		Domain:   "localhost",
 		Name:     name,
 		Value:    value,
 		Path:     "/",
 		HttpOnly: true,
 		Secure:   c.shouldEnableHTTPS, // Set to true if using HTTPS
-		SameSite: http.SameSiteStrictMode,
+		SameSite: http.SameSiteLaxMode,
 		MaxAge:   59 * 60,
 	})
 }

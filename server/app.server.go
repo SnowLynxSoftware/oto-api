@@ -30,7 +30,7 @@ func NewAppServer(config config.IAppConfig) *AppServer {
 	r.Use(mid.Logger)
 
 	r.Use(cors.Handler(cors.Options{
-		AllowedOrigins:   []string{"*"}, // Change this to your frontend's URL in production
+		AllowedOrigins:   []string{"http://127.0.0.1:4200"}, // Change this to your frontend's URL in production
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 		ExposedHeaders:   []string{"Link"},
