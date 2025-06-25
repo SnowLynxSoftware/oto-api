@@ -17,13 +17,15 @@ type AuthController struct {
 	authMiddleware    middleware.IAuthMiddleware
 	authService       services.IAuthService
 	shouldEnableHTTPS bool
+	cookieDomain      string
 }
 
-func NewAuthController(authMiddleware middleware.IAuthMiddleware, authService services.IAuthService, shouldEnableHTTPS bool) IController {
+func NewAuthController(authMiddleware middleware.IAuthMiddleware, authService services.IAuthService, shouldEnableHTTPS bool, cookieDomain string) IController {
 	return &AuthController{
 		authMiddleware:    authMiddleware,
 		authService:       authService,
 		shouldEnableHTTPS: shouldEnableHTTPS,
+		cookieDomain:      cookieDomain,
 	}
 }
 
@@ -218,7 +220,7 @@ func (c *AuthController) updateSelfPassword(w http.ResponseWriter, r *http.Reque
 
 func (c *AuthController) setCookie(w http.ResponseWriter, name string, value string) {
 	http.SetCookie(w, &http.Cookie{
-		Domain:   "localhost",
+		Domain:   c.cookieDomain,
 		Name:     name,
 		Value:    value,
 		Path:     "/",
