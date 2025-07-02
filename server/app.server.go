@@ -66,6 +66,7 @@ func (s *AppServer) Start() {
 	authService := services.NewAuthService(userRepository, tokenService, cryptoService, emailService)
 	triviaService := services.NewTriviaService(triviaRepository)
 	waitlistService := services.NewWaitlistService(waitlistRepository)
+	userService := services.NewUserService(userRepository)
 
 	// Configure Middleware
 	authMiddleware := middleware.NewAuthMiddleware(userRepository, tokenService)
@@ -75,6 +76,7 @@ func (s *AppServer) Start() {
 	s.router.Mount("/auth", controllers.NewAuthController(authMiddleware, authService, isProductionMode, s.appConfig.GetCookieDomain()).MapController())
 	s.router.Mount("/trivia", controllers.NewTriviaController(triviaService, authMiddleware).MapController())
 	s.router.Mount("/waitlist", controllers.NewWaitlistController(waitlistService).MapController())
+	s.router.Mount("/users", controllers.NewUserController(userService, authMiddleware).MapController())
 
 	util.LogInfo("Starting server on localhost:3000")
 	log.Fatal(http.ListenAndServe("localhost:3000", s.router))

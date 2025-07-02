@@ -31,15 +31,19 @@ var (
 )
 
 type IUserRepository interface {
+	GetUsersCount(searchString string) (*int, error)
+	GetUsers(pageSize int, offset int, searchString string) ([]*UserEntity, error)
 	GetUserById(id int) (*UserEntity, error)
 	GetUserByEmail(email string) (*UserEntity, error)
 	CreateNewUser(dto *models.UserCreateDTO) (*UserEntity, error)
 	MarkUserVerified(userId *int) (bool, error)
+	UpdateUser(dto *models.UserUpdateDTO, userId *int) (*UserEntity, error)
 	UpdateUserLastLogin(userId *int) (bool, error)
 	UpdateUserPassword(userId *int, password string) (bool, error)
 	BanUserByIdWithReason(userId *int, reason string) (bool, error)
 	UnbanUserById(userId *int) (bool, error)
 	SetUserTypeKey(userId *int, key string) (bool, error)
+	ToggleUserArchived(userId *int) error
 }
 
 type UserRepository struct {
@@ -50,6 +54,44 @@ func NewUserRepository(db *database.AppDataSource) IUserRepository {
 	return &UserRepository{
 		db: db,
 	}
+}
+
+// ToggleUserArchived toggles the archived status of a user and clears the password hash.
+func (r *UserRepository) ToggleUserArchived(userId *int) error {
+	sql := `UPDATE users SET is_archived = NOT is_archived, password_hash = '', modified_at = NOW() WHERE id = $1;`
+	_, err := r.db.DB.Exec(sql, &userId)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *UserRepository) GetUsersCount(searchString string) (*int, error) {
+	count := new(int)
+	sql := `SELECT
+		COUNT(*) as count
+	FROM users
+	WHERE (email LIKE '%' || $1 || '%') OR (display_name LIKE '%' || $1 || '%')`
+	err := r.db.DB.Get(&count, sql, searchString)
+	if err != nil {
+		return nil, err
+	}
+	return count, nil
+}
+
+func (r *UserRepository) GetUsers(pageSize int, offset int, searchString string) ([]*UserEntity, error) {
+	users := []*UserEntity{}
+	sql := `SELECT
+		*
+	FROM users
+	WHERE (email LIKE '%' || $3 || '%') OR (display_name LIKE '%' || $3 || '%')
+	ORDER BY created_at DESC
+	LIMIT $1 OFFSET $2`
+	err := r.db.DB.Select(&users, sql, pageSize, offset, searchString)
+	if err != nil {
+		return nil, err
+	}
+	return users, nil
 }
 
 func (r *UserRepository) GetUserById(id int) (*UserEntity, error) {
@@ -98,13 +140,33 @@ func (r *UserRepository) CreateNewUser(dto *models.UserCreateDTO) (*UserEntity, 
 }
 
 func (r *UserRepository) MarkUserVerified(userId *int) (bool, error) {
-	sql := `UPDATE users SET is_verified = true WHERE id = $1;`
+	sql := `UPDATE users SET is_verified = true, modified_at = NOW() WHERE id = $1;`
 	_, err := r.db.DB.Exec(sql, &userId)
 	if err != nil {
 		return false, err
 	}
 
 	return true, nil
+}
+
+func (r *UserRepository) UpdateUser(dto *models.UserUpdateDTO, userId *int) (*UserEntity, error) {
+	sql := `UPDATE users
+		SET
+			email = $1,
+			display_name = $2,
+			avatar_url = $3,
+			profile_text = $4,
+			modified_at = NOW()
+		WHERE id = $5;`
+	_, err := r.db.DB.Exec(sql, dto.Email, dto.DisplayName, dto.AvatarURL, dto.ProfileText, &userId)
+	if err != nil {
+		return nil, err
+	}
+	user, err := r.GetUserById(*userId)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
 }
 
 func (r *UserRepository) UpdateUserLastLogin(userId *int) (bool, error) {
