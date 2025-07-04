@@ -79,5 +79,5 @@ func (s *AppServer) Start() {
 	s.router.Mount("/users", controllers.NewUserController(userService, authMiddleware).MapController())
 
 	util.LogInfo("Starting server on localhost:3000")
-	log.Fatal(http.ListenAndServe("localhost:3000", s.router))
+	log.Fatal(http.ListenAndServe("0.0.0.0:3000", s.router))
 }
