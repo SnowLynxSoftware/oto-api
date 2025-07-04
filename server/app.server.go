@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 
@@ -30,7 +29,7 @@ func NewAppServer(config config.IAppConfig) *AppServer {
 	r.Use(mid.Logger)
 
 	r.Use(cors.Handler(cors.Options{
-		AllowedOrigins:   []string{"*"}, // Change this to your frontend's URL in production
+		AllowedOrigins:   []string{config.GetCorsAllowedOrigin()},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 		ExposedHeaders:   []string{"Link"},
@@ -67,16 +66,18 @@ func (s *AppServer) Start() {
 	authService := services.NewAuthService(userRepository, tokenService, cryptoService, emailService)
 	triviaService := services.NewTriviaService(triviaRepository)
 	waitlistService := services.NewWaitlistService(waitlistRepository)
+	userService := services.NewUserService(userRepository)
 
 	// Configure Middleware
 	authMiddleware := middleware.NewAuthMiddleware(userRepository, tokenService)
 
 	// Configure Controllers
 	s.router.Mount("/health", controllers.NewHealthController().MapController())
-	s.router.Mount("/auth", controllers.NewAuthController(authMiddleware, authService, isProductionMode).MapController())
+	s.router.Mount("/auth", controllers.NewAuthController(authMiddleware, authService, isProductionMode, s.appConfig.GetCookieDomain()).MapController())
 	s.router.Mount("/trivia", controllers.NewTriviaController(triviaService, authMiddleware).MapController())
 	s.router.Mount("/waitlist", controllers.NewWaitlistController(waitlistService).MapController())
+	s.router.Mount("/users", controllers.NewUserController(userService, authMiddleware).MapController())
 
-	util.LogInfo(fmt.Sprintf("Starting server on port %s", "3000"))
-	log.Fatal(http.ListenAndServe(":3000", s.router))
+	util.LogInfo("Starting server on localhost:3000")
+	log.Fatal(http.ListenAndServe("localhost:3000", s.router))
 }

@@ -14,6 +14,8 @@ type IAppConfig interface {
 	GetAuthHashPepper() string
 	GetJWTSecretKey() string
 	GetSendgridAPIKey() string
+	GetCorsAllowedOrigin() string
+	GetCookieDomain() string
 }
 
 type AppConfig struct {
@@ -23,6 +25,8 @@ type AppConfig struct {
 	authHashPepper     string
 	jwtSecretKey       string
 	sendgridAPIKey     string
+	corsAllowedOrigin  string
+	cookieDomain       string
 }
 
 func NewAppConfig() IAppConfig {
@@ -37,6 +41,8 @@ func NewAppConfig() IAppConfig {
 	appConfig.authHashPepper = ""
 	appConfig.jwtSecretKey = ""
 	appConfig.sendgridAPIKey = ""
+	appConfig.corsAllowedOrigin = "http://localhost:4200"
+	appConfig.cookieDomain = "localhost"
 
 	if appConfig.cloudEnv == "" {
 		log.Fatal("[CLOUD_ENV] is required")
@@ -47,6 +53,14 @@ func NewAppConfig() IAppConfig {
 	appConfig.authHashPepper = os.Getenv("AUTH_HASH_PEPPER")
 	appConfig.jwtSecretKey = os.Getenv("JWT_SECRET_KEY")
 	appConfig.sendgridAPIKey = os.Getenv("SENDGRID_API_KEY")
+
+	// Load optional configuration with defaults
+	if corsOrigin := os.Getenv("CORS_ALLOWED_ORIGIN"); corsOrigin != "" {
+		appConfig.corsAllowedOrigin = corsOrigin
+	}
+	if cookieDomain := os.Getenv("COOKIE_DOMAIN"); cookieDomain != "" {
+		appConfig.cookieDomain = cookieDomain
+	}
 
 	errorList := ""
 
@@ -96,4 +110,12 @@ func (a *AppConfig) GetJWTSecretKey() string {
 
 func (a *AppConfig) GetSendgridAPIKey() string {
 	return a.sendgridAPIKey
+}
+
+func (a *AppConfig) GetCorsAllowedOrigin() string {
+	return a.corsAllowedOrigin
+}
+
+func (a *AppConfig) GetCookieDomain() string {
+	return a.cookieDomain
 }

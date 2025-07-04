@@ -14,3 +14,10 @@ type UserLoginResponseDTO struct {
 type UserUpdatePasswordDTO struct {
 	Password string `json:"password"`
 }
+
+type UserUpdateDTO struct {
+	Email       string  `json:"email" db:"email"`
+	DisplayName string  `json:"display_name" db:"display_name"`
+	AvatarURL   *string `json:"avatar_url" db:"avatar_url"`
+	ProfileText *string `json:"profile_text" db:"profile_text"`
+}

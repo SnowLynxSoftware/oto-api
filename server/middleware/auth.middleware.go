@@ -28,9 +28,11 @@ func NewAuthMiddleware(userRepository repositories.IUserRepository, tokenService
 // If a request is authorized, it will return this context to the controller
 // so that information from the user can be used as an immutable object.
 type AuthorizedUserContext struct {
-	Id       int    `json:"id"`
-	Email    string `json:"email"`
-	Username string `json:"username"`
+	Id        int    `json:"id"`
+	Email     string `json:"email"`
+	Username  string `json:"username"`
+	IsAdmin   bool   `json:"is_admin,omitempty"`   // Optional, only set if the user is an admin
+	IsSupport bool   `json:"is_support,omitempty"` // Optional, only set if the user is a support agent
 }
 
 func (m *AuthMiddleware) Authorize(r *http.Request, requiredUserTypeKeys []string) (*AuthorizedUserContext, error) {
@@ -79,9 +81,11 @@ func (m *AuthMiddleware) Authorize(r *http.Request, requiredUserTypeKeys []strin
 	}
 
 	return &AuthorizedUserContext{
-		Id:       int(userEntity.ID),
-		Email:    userEntity.Email,
-		Username: userEntity.DisplayName,
+		Id:        int(userEntity.ID),
+		Email:     userEntity.Email,
+		Username:  userEntity.DisplayName,
+		IsAdmin:   userEntity.UserTypeKey == repositories.UserTypeAdmin,
+		IsSupport: userEntity.UserTypeKey == repositories.UserTypeSupport,
 	}, nil
 
 }
