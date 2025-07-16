@@ -27,3 +27,28 @@ type TriviaDeckMetadataUpdateRequest struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
 }
+
+// DTOs for CRUD operations
+type TriviaQuestionCreateDTO struct {
+	Question      string   `json:"question"`
+	CorrectAnswer string   `json:"correct_answer"`
+	Tags          []string `json:"tags"`
+	IsPublished   bool     `json:"is_published"`
+}
+
+type TriviaQuestionUpdateDTO struct {
+	Question      string   `json:"question"`
+	CorrectAnswer string   `json:"correct_answer"`
+	Tags          []string `json:"tags"`
+	IsPublished   bool     `json:"is_published"`
+}
+
+type WrongAnswerCreateDTO struct {
+	AnswerText string   `json:"answer_text"`
+	Tags       []string `json:"tags"`
+}
+
+type WrongAnswerUpdateDTO struct {
+	AnswerText string   `json:"answer_text"`
+	Tags       []string `json:"tags"`
+}

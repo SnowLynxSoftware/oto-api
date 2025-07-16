@@ -47,6 +47,8 @@ To run all unit tests, use the following command:
 
 ```bash
 go test ./... -v
+go test ./... -coverprofile=coverage.out
+go tool cover -html=coverage.out -o coverage.html
 ```
 
 ## Deployments
