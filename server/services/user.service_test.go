@@ -16,13 +16,13 @@ type MockUserRepository struct {
 	mock.Mock
 }
 
-func (m *MockUserRepository) GetUsersCount(searchString string) (*int, error) {
-	args := m.Called(searchString)
+func (m *MockUserRepository) GetUsersCount(searchString string, statusFilter string, userTypeFilter string) (*int, error) {
+	args := m.Called(searchString, statusFilter, userTypeFilter)
 	return args.Get(0).(*int), args.Error(1)
 }
 
-func (m *MockUserRepository) GetUsers(pageSize int, offset int, searchString string) ([]*repositories.UserEntity, error) {
-	args := m.Called(pageSize, offset, searchString)
+func (m *MockUserRepository) GetUsers(pageSize int, offset int, searchString string, statusFilter string, userTypeFilter string) ([]*repositories.UserEntity, error) {
+	args := m.Called(pageSize, offset, searchString, statusFilter, userTypeFilter)
 	return args.Get(0).([]*repositories.UserEntity), args.Error(1)
 }
 
@@ -162,12 +162,14 @@ func TestUserService_GetUsers_Success(t *testing.T) {
 	pageSize := 10
 	offset := 0
 	searchString := ""
+	statusFilter := ""
+	userTypeFilter := ""
 
-	mockRepo.On("GetUsers", pageSize, offset, searchString).Return(expectedUsers, nil)
-	mockRepo.On("GetUsersCount", searchString).Return(&totalCount, nil)
+	mockRepo.On("GetUsers", pageSize, offset, searchString, statusFilter, userTypeFilter).Return(expectedUsers, nil)
+	mockRepo.On("GetUsersCount", searchString, statusFilter, userTypeFilter).Return(&totalCount, nil)
 
 	// Act
-	result, err := userService.GetUsers(pageSize, offset, searchString)
+	result, err := userService.GetUsers(pageSize, offset, searchString, statusFilter, userTypeFilter)
 
 	// Assert
 	assert.NoError(t, err)
@@ -188,11 +190,13 @@ func TestUserService_GetUsers_RepositoryError(t *testing.T) {
 	pageSize := 10
 	offset := 0
 	searchString := ""
+	statusFilter := ""
+	userTypeFilter := ""
 
-	mockRepo.On("GetUsers", pageSize, offset, searchString).Return([]*repositories.UserEntity(nil), errors.New("database error"))
+	mockRepo.On("GetUsers", pageSize, offset, searchString, statusFilter, userTypeFilter).Return([]*repositories.UserEntity(nil), errors.New("database error"))
 
 	// Act
-	result, err := userService.GetUsers(pageSize, offset, searchString)
+	result, err := userService.GetUsers(pageSize, offset, searchString, statusFilter, userTypeFilter)
 
 	// Assert
 	assert.Error(t, err)
@@ -214,12 +218,14 @@ func TestUserService_GetUsers_CountError(t *testing.T) {
 	pageSize := 10
 	offset := 0
 	searchString := ""
+	statusFilter := ""
+	userTypeFilter := ""
 
-	mockRepo.On("GetUsers", pageSize, offset, searchString).Return(expectedUsers, nil)
-	mockRepo.On("GetUsersCount", searchString).Return((*int)(nil), errors.New("count error"))
+	mockRepo.On("GetUsers", pageSize, offset, searchString, statusFilter, userTypeFilter).Return(expectedUsers, nil)
+	mockRepo.On("GetUsersCount", searchString, statusFilter, userTypeFilter).Return((*int)(nil), errors.New("count error"))
 
 	// Act
-	result, err := userService.GetUsers(pageSize, offset, searchString)
+	result, err := userService.GetUsers(pageSize, offset, searchString, statusFilter, userTypeFilter)
 
 	// Assert
 	assert.Error(t, err)
