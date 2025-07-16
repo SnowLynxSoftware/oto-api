@@ -20,4 +20,9 @@ type UserUpdateDTO struct {
 	DisplayName string  `json:"display_name" db:"display_name"`
 	AvatarURL   *string `json:"avatar_url" db:"avatar_url"`
 	ProfileText *string `json:"profile_text" db:"profile_text"`
+	UserTypeKey string  `json:"user_type_key" db:"user_type_key"`
+}
+
+type UserBanDTO struct {
+	Reason string `json:"reason"`
 }

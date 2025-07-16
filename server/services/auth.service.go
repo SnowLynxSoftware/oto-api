@@ -111,6 +111,13 @@ func (s *AuthService) LoginWithEmailLink(userId *int) (*models.UserLoginResponse
 		return nil, errors.New("there was an issue trying to log this user in")
 	}
 
+	// Update user's last login timestamp
+	_, err = s.userRepository.UpdateUserLastLogin(userId)
+	if err != nil {
+		util.LogErrorWithStackTrace(err)
+		return nil, errors.New("there was an issue trying to log this user in")
+	}
+
 	return &models.UserLoginResponseDTO{
 		AccessToken:  *accessToken,
 		RefreshToken: "",
@@ -180,11 +187,13 @@ func (s *AuthService) Login(authHeaderStr *string) (*models.UserLoginResponseDTO
 		return nil, errors.New("there was an issue trying to log this user in")
 	}
 
-	// userId := int(user.ID)
-	// err = s.userLastLoginRepository.CreateLoginHistoryForUser(&userId)
-	// if err != nil {
-	// 	util.LogErrorWithStackTrace(err)
-	// }
+	// Update user's last login timestamp
+	userId := int(user.ID)
+	_, err = s.userRepository.UpdateUserLastLogin(&userId)
+	if err != nil {
+		util.LogErrorWithStackTrace(err)
+		return nil, errors.New("there was an issue trying to log this user in")
+	}
 
 	return &models.UserLoginResponseDTO{
 		AccessToken:  *accessToken,

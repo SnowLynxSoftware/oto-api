@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/snowlynxsoftware/oto-api/server/database"
@@ -31,8 +32,8 @@ var (
 )
 
 type IUserRepository interface {
-	GetUsersCount(searchString string) (*int, error)
-	GetUsers(pageSize int, offset int, searchString string) ([]*UserEntity, error)
+	GetUsersCount(searchString string, statusFilter string, userTypeFilter string) (*int, error)
+	GetUsers(pageSize int, offset int, searchString string, statusFilter string, userTypeFilter string) ([]*UserEntity, error)
 	GetUserById(id int) (*UserEntity, error)
 	GetUserByEmail(email string) (*UserEntity, error)
 	CreateNewUser(dto *models.UserCreateDTO) (*UserEntity, error)
@@ -66,28 +67,72 @@ func (r *UserRepository) ToggleUserArchived(userId *int) error {
 	return nil
 }
 
-func (r *UserRepository) GetUsersCount(searchString string) (*int, error) {
+func (r *UserRepository) GetUsersCount(searchString string, statusFilter string, userTypeFilter string) (*int, error) {
 	count := new(int)
 	sql := `SELECT
 		COUNT(*) as count
 	FROM users
-	WHERE (email LIKE '%' || $1 || '%') OR (display_name LIKE '%' || $1 || '%')`
-	err := r.db.DB.Get(&count, sql, searchString)
+	WHERE ((email LIKE '%' || $1 || '%') OR (display_name LIKE '%' || $1 || '%'))`
+
+	// Build dynamic WHERE clause for filtering
+	args := []interface{}{searchString}
+	argIndex := 2
+
+	if statusFilter != "" {
+		switch statusFilter {
+		case "active":
+			sql += ` AND is_archived = false AND is_banned = false`
+		case "archived":
+			sql += ` AND is_archived = true`
+		case "banned":
+			sql += ` AND is_banned = true`
+		}
+	}
+
+	if userTypeFilter != "" {
+		sql += ` AND user_type_key = $` + fmt.Sprintf("%d", argIndex)
+		args = append(args, userTypeFilter)
+		argIndex++
+	}
+
+	err := r.db.DB.Get(&count, sql, args...)
 	if err != nil {
 		return nil, err
 	}
 	return count, nil
 }
 
-func (r *UserRepository) GetUsers(pageSize int, offset int, searchString string) ([]*UserEntity, error) {
+func (r *UserRepository) GetUsers(pageSize int, offset int, searchString string, statusFilter string, userTypeFilter string) ([]*UserEntity, error) {
 	users := []*UserEntity{}
 	sql := `SELECT
 		*
 	FROM users
-	WHERE (email LIKE '%' || $3 || '%') OR (display_name LIKE '%' || $3 || '%')
-	ORDER BY created_at DESC
-	LIMIT $1 OFFSET $2`
-	err := r.db.DB.Select(&users, sql, pageSize, offset, searchString)
+	WHERE ((email LIKE '%' || $3 || '%') OR (display_name LIKE '%' || $3 || '%'))`
+
+	// Build dynamic WHERE clause for filtering
+	args := []interface{}{pageSize, offset, searchString}
+	argIndex := 4
+
+	if statusFilter != "" {
+		switch statusFilter {
+		case "active":
+			sql += ` AND is_archived = false AND is_banned = false`
+		case "archived":
+			sql += ` AND is_archived = true`
+		case "banned":
+			sql += ` AND is_banned = true`
+		}
+	}
+
+	if userTypeFilter != "" {
+		sql += ` AND user_type_key = $` + fmt.Sprintf("%d", argIndex)
+		args = append(args, userTypeFilter)
+		argIndex++
+	}
+
+	sql += ` ORDER BY created_at DESC LIMIT $1 OFFSET $2`
+	fmt.Println("GetUsers SQL:", sql, "Args:", args)
+	err := r.db.DB.Select(&users, sql, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -156,9 +201,10 @@ func (r *UserRepository) UpdateUser(dto *models.UserUpdateDTO, userId *int) (*Us
 			display_name = $2,
 			avatar_url = $3,
 			profile_text = $4,
+			user_type_key = $5,
 			modified_at = NOW()
-		WHERE id = $5;`
-	_, err := r.db.DB.Exec(sql, dto.Email, dto.DisplayName, dto.AvatarURL, dto.ProfileText, &userId)
+		WHERE id = $6;`
+	_, err := r.db.DB.Exec(sql, dto.Email, dto.DisplayName, dto.AvatarURL, dto.ProfileText, dto.UserTypeKey, &userId)
 	if err != nil {
 		return nil, err
 	}
