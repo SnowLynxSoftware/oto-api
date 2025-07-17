@@ -30,6 +30,8 @@ func (c *UserController) MapController() *chi.Mux {
 	r.Get("/{id}", c.getUserById)
 	r.Put("/{id}", c.updateUser)
 	r.Patch("/{id}/archived", c.toggleUserArchived)
+	r.Post("/{id}/ban", c.banUser)
+	r.Post("/{id}/unban", c.unbanUser)
 	return r
 }
 
@@ -86,6 +88,13 @@ func (c *UserController) updateUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "email and display name are required", http.StatusBadRequest)
 		return
 	}
+
+	// Check if user is trying to set admin type - only admins can do this
+	if userUpdateDTO.UserTypeKey == "admin" && !userContext.IsAdmin {
+		http.Error(w, "only admins can promote users to admin", http.StatusForbidden)
+		return
+	}
+
 	updatedUser, err := c.userService.UpdateUser(&userUpdateDTO, &userId)
 	if err != nil {
 		util.LogErrorWithStackTrace(err)
@@ -148,9 +157,12 @@ func (c *UserController) getUsers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get query parameters
-	pageSize := 100    // Default page size
-	page := 1          // Default page number
-	searchString := "" // Default search string
+	pageSize := 25       // Default page size
+	page := 1            // Default page number
+	searchString := ""   // Default search string
+	statusFilter := ""   // Default status filter
+	userTypeFilter := "" // Default user type filter
+
 	if ps := r.URL.Query().Get("page_size"); ps != "" {
 		if psInt, err := strconv.Atoi(ps); err == nil && psInt > 0 {
 			pageSize = psInt
@@ -164,10 +176,16 @@ func (c *UserController) getUsers(w http.ResponseWriter, r *http.Request) {
 	if search := r.URL.Query().Get("search"); search != "" {
 		searchString = search
 	}
+	if status := r.URL.Query().Get("status"); status != "" {
+		statusFilter = status
+	}
+	if userType := r.URL.Query().Get("user_type"); userType != "" {
+		userTypeFilter = userType
+	}
 
 	offset := (page - 1) * pageSize
 
-	results, err := c.userService.GetUsers(pageSize, offset, searchString)
+	results, err := c.userService.GetUsers(pageSize, offset, searchString, statusFilter, userTypeFilter)
 	if err != nil {
 		util.LogErrorWithStackTrace(err)
 		http.Error(w, "failed to retrieve users", http.StatusInternalServerError)
@@ -186,4 +204,68 @@ func (c *UserController) getUsers(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(returnStr)
+}
+
+func (c *UserController) banUser(w http.ResponseWriter, r *http.Request) {
+	_, err := c.authMiddleware.Authorize(r, []string{"admin", "support"})
+	if err != nil {
+		util.LogErrorWithStackTrace(err)
+		http.Error(w, "you are not authorized to perform this request", http.StatusUnauthorized)
+		return
+	}
+
+	userIdStr := chi.URLParam(r, "id")
+	userId, err := strconv.Atoi(userIdStr)
+	if err != nil || userId <= 0 {
+		http.Error(w, "invalid user ID", http.StatusBadRequest)
+		return
+	}
+
+	var banDTO models.UserBanDTO
+	err = json.NewDecoder(r.Body).Decode(&banDTO)
+	if err != nil {
+		http.Error(w, "failed to decode request body", http.StatusBadRequest)
+		return
+	}
+
+	if banDTO.Reason == "" {
+		http.Error(w, "ban reason is required", http.StatusBadRequest)
+		return
+	}
+
+	err = c.userService.BanUser(&userId, banDTO.Reason)
+	if err != nil {
+		util.LogErrorWithStackTrace(err)
+		http.Error(w, "failed to ban user", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("user banned successfully"))
+}
+
+func (c *UserController) unbanUser(w http.ResponseWriter, r *http.Request) {
+	_, err := c.authMiddleware.Authorize(r, []string{"admin", "support"})
+	if err != nil {
+		util.LogErrorWithStackTrace(err)
+		http.Error(w, "you are not authorized to perform this request", http.StatusUnauthorized)
+		return
+	}
+
+	userIdStr := chi.URLParam(r, "id")
+	userId, err := strconv.Atoi(userIdStr)
+	if err != nil || userId <= 0 {
+		http.Error(w, "invalid user ID", http.StatusBadRequest)
+		return
+	}
+
+	err = c.userService.UnbanUser(&userId)
+	if err != nil {
+		util.LogErrorWithStackTrace(err)
+		http.Error(w, "failed to unban user", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("user unbanned successfully"))
 }

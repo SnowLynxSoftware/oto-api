@@ -373,6 +373,7 @@ func TestAuthService_LoginWithEmailLink_Success(t *testing.T) {
 	accessToken := "access_token_123"
 
 	mockTokenService.On("GenerateAccessToken", userId).Return(&accessToken, nil)
+	mockUserRepo.On("UpdateUserLastLogin", &userId).Return(true, nil)
 
 	// Act
 	result, err := authService.LoginWithEmailLink(&userId)
@@ -383,6 +384,7 @@ func TestAuthService_LoginWithEmailLink_Success(t *testing.T) {
 	assert.Equal(t, accessToken, result.AccessToken)
 	assert.Equal(t, "", result.RefreshToken)
 	mockTokenService.AssertExpectations(t)
+	mockUserRepo.AssertExpectations(t)
 }
 
 // Test LoginWithEmailLink - Token Generation Error
@@ -407,4 +409,31 @@ func TestAuthService_LoginWithEmailLink_TokenGenerationError(t *testing.T) {
 	assert.Nil(t, result)
 	assert.Contains(t, err.Error(), "there was an issue trying to log this user in")
 	mockTokenService.AssertExpectations(t)
+}
+
+// Test LoginWithEmailLink - Last Login Update Error
+func TestAuthService_LoginWithEmailLink_LastLoginUpdateError(t *testing.T) {
+	// Arrange
+	mockUserRepo := new(MockUserRepository)
+	mockTokenService := new(MockTokenService)
+	mockCryptoService := new(MockCryptoService)
+	mockEmailService := new(MockEmailService)
+
+	authService := NewAuthService(mockUserRepo, mockTokenService, mockCryptoService, mockEmailService)
+
+	userId := 123
+	accessToken := "access_token_123"
+
+	mockTokenService.On("GenerateAccessToken", userId).Return(&accessToken, nil)
+	mockUserRepo.On("UpdateUserLastLogin", &userId).Return(false, errors.New("database error"))
+
+	// Act
+	result, err := authService.LoginWithEmailLink(&userId)
+
+	// Assert
+	assert.Error(t, err)
+	assert.Nil(t, result)
+	assert.Contains(t, err.Error(), "there was an issue trying to log this user in")
+	mockTokenService.AssertExpectations(t)
+	mockUserRepo.AssertExpectations(t)
 }

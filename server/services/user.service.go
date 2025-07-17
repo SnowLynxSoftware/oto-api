@@ -7,9 +7,11 @@ import (
 
 type IUserService interface {
 	GetUserById(id int) (*repositories.UserEntity, error)
-	GetUsers(pageSize int, offset int, searchString string) (*models.PaginatedResponse, error)
+	GetUsers(pageSize int, offset int, searchString string, statusFilter string, userTypeFilter string) (*models.PaginatedResponse, error)
 	UpdateUser(dto *models.UserUpdateDTO, userId *int) (*repositories.UserEntity, error)
 	ToggleUserArchived(userId *int) error
+	BanUser(userId *int, reason string) error
+	UnbanUser(userId *int) error
 }
 
 type UserService struct {
@@ -48,12 +50,12 @@ func (s *UserService) GetUserById(id int) (*repositories.UserEntity, error) {
 	return user, nil
 }
 
-func (s *UserService) GetUsers(pageSize int, offset int, searchString string) (*models.PaginatedResponse, error) {
-	users, err := s.userRepository.GetUsers(pageSize, offset, searchString)
+func (s *UserService) GetUsers(pageSize int, offset int, searchString string, statusFilter string, userTypeFilter string) (*models.PaginatedResponse, error) {
+	users, err := s.userRepository.GetUsers(pageSize, offset, searchString, statusFilter, userTypeFilter)
 	if err != nil {
 		return nil, err
 	}
-	count, err := s.userRepository.GetUsersCount(searchString)
+	count, err := s.userRepository.GetUsersCount(searchString, statusFilter, userTypeFilter)
 	if err != nil {
 		return nil, err
 	}
@@ -77,4 +79,14 @@ func (s *UserService) GetUsers(pageSize int, offset int, searchString string) (*
 		Results:  results,
 	}
 	return paginatedResponse, nil
+}
+
+func (s *UserService) BanUser(userId *int, reason string) error {
+	_, err := s.userRepository.BanUserByIdWithReason(userId, reason)
+	return err
+}
+
+func (s *UserService) UnbanUser(userId *int) error {
+	_, err := s.userRepository.UnbanUserById(userId)
+	return err
 }

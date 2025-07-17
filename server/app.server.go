@@ -30,7 +30,7 @@ func NewAppServer(config config.IAppConfig) *AppServer {
 
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{config.GetCorsAllowedOrigin()},
-		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 		ExposedHeaders:   []string{"Link"},
 		AllowCredentials: true,
